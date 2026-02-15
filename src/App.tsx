@@ -43,6 +43,7 @@ import FacultyShow from "./pages/faculty/show";
 import EnrollmentsCreate from "./pages/enrollments/create";
 import EnrollmentsJoin from "./pages/enrollments/join";
 import EnrollmentConfirm from "./pages/enrollments/confirm";
+import { InstallPWAButton } from "./components/refine-ui/buttons/InstallPWAButton";
 
 function App() {
   return (
@@ -179,6 +180,7 @@ function App() {
                 </Route>
               </Routes>
 
+              <InstallPWAButton />
               <Toaster />
               <RefineKbar />
               <UnsavedChangesNotifier />
