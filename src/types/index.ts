@@ -119,4 +119,6 @@ export type SignUpPayload = {
   image?: string;
   imageCldPubId?: string;
   role: UserRole;
+  /** Required when role is "teacher" - secret key to authorize teacher sign-up */
+  teacherSecretKey?: string;
 };

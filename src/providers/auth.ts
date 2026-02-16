@@ -10,6 +10,7 @@ export const authProvider: AuthProvider = {
     role,
     image,
     imageCldPubId,
+    teacherSecretKey,
   }: SignUpPayload) => {
     try {
       const { data, error } = await authClient.signUp.email({
@@ -19,6 +20,9 @@ export const authProvider: AuthProvider = {
         image,
         role,
         imageCldPubId,
+        ...(role === "teacher" && teacherSecretKey
+          ? { teacherSecretKey }
+          : {}),
       } as SignUpPayload);
 
       if (error) {

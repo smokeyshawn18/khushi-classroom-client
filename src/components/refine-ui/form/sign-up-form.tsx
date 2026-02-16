@@ -29,14 +29,24 @@ import UploadWidget from "@/components/upload-widget";
 import { UserRole } from "@/types";
 import { toast } from "sonner";
 
-const registerSchema = z.object({
-  email: z.string().email("Invalid email address"),
-  password: z.string().min(8, "Password must be at least 8 characters"),
-  name: z.string().min(3, "Full name must be at least 3 characters"),
-  role: z.nativeEnum(UserRole),
-  image: z.string().optional(),
-  imageCldPubId: z.string().optional(),
-});
+const registerSchema = z
+  .object({
+    email: z.string().email("Invalid email address"),
+    password: z.string().min(8, "Password must be at least 8 characters"),
+    name: z.string().min(3, "Full name must be at least 3 characters"),
+    role: z.nativeEnum(UserRole),
+    image: z.string().optional(),
+    imageCldPubId: z.string().optional(),
+    teacherSecretKey: z.string().optional(),
+  })
+  .refine(
+    (data) =>
+      data.role !== UserRole.TEACHER || (data.teacherSecretKey?.length ?? 0) > 0,
+    {
+      message: "Teacher secret key is required to register as a teacher",
+      path: ["teacherSecretKey"],
+    }
+  );
 
 type RegisterFormValues = z.infer<typeof registerSchema>;
 
@@ -53,6 +63,7 @@ export const SignUpForm = () => {
       role: UserRole.STUDENT,
       image: "",
       imageCldPubId: "",
+      teacherSecretKey: "",
     },
   });
 
@@ -66,6 +77,10 @@ export const SignUpForm = () => {
           name: values.name,
           image: values.image || undefined,
           imageCldPubId: values.imageCldPubId || undefined,
+          teacherSecretKey:
+            values.role === UserRole.TEACHER
+              ? values.teacherSecretKey || undefined
+              : undefined,
         },
         {
           onSuccess: (data) => {
@@ -139,6 +154,26 @@ export const SignUpForm = () => {
                   </FormItem>
                 )}
               />
+
+              {/* Teacher Secret Key - only shown when role is teacher */}
+              {form.watch("role") === UserRole.TEACHER && (
+                <FormField
+                  control={form.control}
+                  name="teacherSecretKey"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel>Teacher Secret Key *</FormLabel>
+                      <FormControl>
+                        <InputPassword
+                          {...field}
+                          placeholder="Enter the teacher authorization key"
+                        />
+                      </FormControl>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
+              )}
 
               {/* Profile Photo Upload */}
               <FormField
