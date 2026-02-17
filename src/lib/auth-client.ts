@@ -3,6 +3,10 @@ import { BACKEND_BASE_URL, USER_ROLES } from "../constants";
 
 export const authClient = createAuthClient({
   baseURL: `${BACKEND_BASE_URL.replace(/\/$/, "")}/auth`,
+  // Ensure BetterAuth requests send cookies on cross-origin calls
+  fetchOptions: {
+    credentials: "include",
+  },
   user: {
     additionalFields: {
       role: {
