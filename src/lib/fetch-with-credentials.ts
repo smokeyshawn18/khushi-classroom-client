@@ -1,6 +1,6 @@
-const originalFetch = window.fetch;
+const originalFetch = window.fetch.bind(window);
 
-window.fetch = (input: RequestInfo | URL, init?: RequestInit) => {
+window.fetch = (input: RequestInfo | URL, init: RequestInit = {}) => {
   return originalFetch(input, {
     ...init,
     credentials: "include",
