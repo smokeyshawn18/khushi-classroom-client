@@ -54,6 +54,9 @@ const Dashboard = () => {
   const { query: departmentsQuery } = useList<Department>({
     resource: "departments",
     pagination: { mode: "off" },
+    meta: {
+      all: true,
+    },
   });
 
   const { query: classesQuery } = useList<ClassListItem>({
@@ -66,9 +69,10 @@ const Dashboard = () => {
   const departments = departmentsQuery.data?.data ?? [];
   const classes = classesQuery.data?.data ?? [];
 
+  // console.log("total users:", users.length);
   const usersByRole = useMemo(() => {
     const counts = users.reduce<Record<string, number>>((acc, user) => {
-      const role = user.role ?? "unknown";
+      const role = (user.role ?? "unknown").trim().toLowerCase();
       acc[role] = (acc[role] || 0) + 1;
       return acc;
     }, {});
@@ -254,8 +258,7 @@ const Dashboard = () => {
                   <span
                     className="h-2 w-2 rounded-full"
                     style={{
-                      backgroundColor:
-                        roleColors[index % roleColors.length],
+                      backgroundColor: roleColors[index % roleColors.length],
                     }}
                   />
                   {entry.role} · {entry.total}

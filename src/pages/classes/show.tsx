@@ -56,7 +56,9 @@ function getInitials(name = "") {
   const parts = name.trim().split(" ").filter(Boolean);
   if (parts.length === 0) return "";
   if (parts.length === 1) return parts[0][0]?.toUpperCase() ?? "";
-  return `${parts[0][0] ?? ""}${parts[parts.length - 1][0] ?? ""}`.toUpperCase();
+  return `${parts[0][0] ?? ""}${
+    parts[parts.length - 1][0] ?? ""
+  }`.toUpperCase();
 }
 
 const ClassesShow = () => {
@@ -78,7 +80,11 @@ const ClassesShow = () => {
   const { result, query: attendanceQuery } = useList<AttendanceRecord>({
     resource: "attendance",
     filters: [
-      { field: "classId", operator: "eq", value: classId ? Number(classId) : "" },
+      {
+        field: "classId",
+        operator: "eq",
+        value: classId ? Number(classId) : "",
+      },
       { field: "date", operator: "eq", value: selectedDate },
     ],
     pagination: { mode: "off" },
@@ -215,7 +221,9 @@ const ClassesShow = () => {
               {isTeacherOrAdmin && (
                 <AttendanceStatusPicker
                   value={record?.status ?? null}
-                  onChange={(status) => handleMarkAttendance(student.id, status)}
+                  onChange={(status) =>
+                    handleMarkAttendance(student.id, status)
+                  }
                 />
               )}
             </div>
@@ -245,8 +253,8 @@ const ClassesShow = () => {
           {query.isLoading
             ? "Loading class details..."
             : query.isError
-              ? "Failed to load class details."
-              : "Class details not found."}
+            ? "Failed to load class details."
+            : "Class details not found."}
         </p>
       </ShowView>
     );
@@ -259,7 +267,9 @@ const ClassesShow = () => {
     .slice(0, 2)
     .map((part) => part[0]?.toUpperCase())
     .join("");
-  const placeholderUrl = `https://placehold.co/600x400?text=${encodeURIComponent(teacherInitials || "NA")}`;
+  const placeholderUrl = `https://placehold.co/600x400?text=${encodeURIComponent(
+    teacherInitials || "NA"
+  )}`;
 
   return (
     <ShowView className="class-view class-show space-y-6">
