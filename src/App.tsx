@@ -180,7 +180,7 @@ function App() {
                 </Route>
               </Routes>
 
-              <InstallPWAButton />
+              {/* <InstallPWAButton /> */}
               <Toaster />
               <RefineKbar />
               <UnsavedChangesNotifier />

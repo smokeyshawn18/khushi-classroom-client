@@ -14,10 +14,18 @@ import { ShowButton } from "@/components/refine-ui/buttons/show";
 import type { User } from "@/types";
 
 const FacultyList = () => {
-  const [searchParams] = useSearchParams();
+  const [searchParams, setSearchParams] = useSearchParams(); // ✅ CHANGED: destructure setSearchParams
   const [searchQuery, setSearchQuery] = useState(
     searchParams.get("search") ?? ""
   );
+
+  // ✅ ADDED: Search handler (3 lines)
+  const handleSearchChange = (event: React.ChangeEvent<HTMLInputElement>) => {
+    const value = event.target.value;
+    setSearchQuery(value);
+    if (value) setSearchParams({ search: value }, { replace: true });
+    else setSearchParams({}, { replace: true });
+  };
 
   const facultyColumns = useMemo<ColumnDef<User>[]>(
     () => [
@@ -75,14 +83,8 @@ const FacultyList = () => {
     []
   );
 
-  const searchFilters = searchQuery
-    ? [
-        {
-          field: "search",
-          operator: "contains" as const,
-          value: searchQuery,
-        },
-      ]
+  const searchFilters = searchQuery // ✅ CHANGED: field name
+    ? [{ field: "q", operator: "contains" as const, value: searchQuery }]
     : [];
 
   const facultyTable = useTable<User>({
@@ -97,8 +99,8 @@ const FacultyList = () => {
         permanent: [
           {
             field: "role",
-            operator: "eq" as const,
-            value: "teacher",
+            operator: "in",
+            value: ["teacher", "student"],
           },
           ...searchFilters,
         ],
@@ -130,7 +132,7 @@ const FacultyList = () => {
               placeholder="Search by name or email..."
               className="pl-10 w-full"
               value={searchQuery}
-              onChange={(event) => setSearchQuery(event.target.value)}
+              onChange={handleSearchChange}
             />
           </div>
         </div>
@@ -145,7 +147,9 @@ const getInitials = (name = "") => {
   const parts = name.trim().split(" ");
   if (parts.length === 0) return "";
   if (parts.length === 1) return parts[0][0]?.toUpperCase() ?? "";
-  return `${parts[0][0] ?? ""}${parts[parts.length - 1][0] ?? ""}`.toUpperCase();
+  return `${parts[0][0] ?? ""}${
+    parts[parts.length - 1][0] ?? ""
+  }`.toUpperCase();
 };
 
 export default FacultyList;

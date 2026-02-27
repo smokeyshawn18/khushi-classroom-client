@@ -15,6 +15,53 @@ import {
 } from "@/components/refine-ui/views/show-view";
 import type { User } from "@/types";
 
+// ✅ Attendance type & columns
+type AttendanceRecord = {
+  id: string;
+  date: string;
+  status: string;
+  class: {
+    id: string;
+    name: string;
+    inviteCode: string;
+  };
+  student: {
+    id: string;
+    name: string;
+    email: string;
+  };
+};
+
+const attendanceColumns = [
+  {
+    accessorKey: "date",
+    header: "Date",
+    size: 140,
+    cell: ({ getValue }) => (
+      <span className="font-medium">
+        {new Date(getValue<string>()).toLocaleDateString()}
+      </span>
+    ),
+  },
+  {
+    accessorKey: "class.name",
+    header: "Class",
+    size: 180,
+    cell: ({ row }) => (
+      <div className="font-medium">{row.original.class.name}</div>
+    ),
+  },
+  {
+    accessorKey: "status",
+    header: "Status",
+    size: 120,
+    cell: ({ getValue }) => {
+      const status = getValue<string>();
+      const variant = status === "present" ? "default" : "secondary";
+      return <Badge variant={variant}>{status}</Badge>;
+    },
+  },
+] as ColumnDef<AttendanceRecord>[];
 type FacultyDepartment = {
   id: number;
   name: string;
@@ -34,6 +81,33 @@ type FacultySubject = {
   } | null;
 };
 
+// ✅ StudentShow - exported for navigation
+export const StudentShow = () => {
+  const { id: studentId } = useParams<{ id: string }>();
+
+  const attendanceTable = useTable<AttendanceRecord>({
+    columns: attendanceColumns,
+    refineCoreProps: {
+      resource: `student/${studentId}`,
+      pagination: { pageSize: 10, mode: "server" },
+    },
+  });
+
+  return (
+    <ShowView>
+      <ShowViewHeader resource="students" title="Student Attendance" />
+      <Card>
+        <CardHeader>
+          <CardTitle>Attendance Records</CardTitle>
+        </CardHeader>
+        <CardContent>
+          <DataTable table={attendanceTable} paginationVariant="simple" />
+        </CardContent>
+      </Card>
+    </ShowView>
+  );
+};
+
 const FacultyShow = () => {
   const { id } = useParams();
   const userId = id ?? "";
@@ -43,6 +117,16 @@ const FacultyShow = () => {
   });
 
   const user = query.data?.data;
+
+  // ✅ getInitials utility
+  const getInitials = (name = "") => {
+    const parts = name.trim().split(" ").filter(Boolean);
+    if (parts.length === 0) return "?";
+    if (parts.length === 1) return parts[0][0]?.toUpperCase() ?? "?";
+    return `${parts[0][0] ?? ""}${
+      parts[parts.length - 1][0] ?? ""
+    }`.toUpperCase();
+  };
 
   const departmentColumns = useMemo<ColumnDef<FacultyDepartment>[]>(
     () => [
@@ -76,7 +160,6 @@ const FacultyShow = () => {
         header: () => <p className="column-title">Description</p>,
         cell: ({ getValue }) => {
           const description = getValue<string>();
-
           return description ? (
             <span className="truncate line-clamp-2">{description}</span>
           ) : (
@@ -90,12 +173,12 @@ const FacultyShow = () => {
         header: () => <p className="column-title">Details</p>,
         cell: ({ row }) => (
           <ShowButton
-            resource="departments"
+            resource="student"
             recordItemId={row.original.id}
             variant="outline"
             size="sm"
           >
-            View
+            View Attendance
           </ShowButton>
         ),
       },
@@ -165,14 +248,29 @@ const FacultyShow = () => {
     []
   );
 
+  // ✅ ADDED: Faculty attendance table (shows students in their classes)
+  const facultyAttendanceTable = useTable<AttendanceRecord>({
+    columns: attendanceColumns,
+    refineCoreProps: {
+      resource: "attendance", // ✅ Matches your /api/attendance
+      pagination: { pageSize: 10, mode: "server" },
+      filters: {
+        permanent: [
+          {
+            field: "facultyId", // or whatever links faculty → classes/students
+            operator: "eq",
+            value: userId,
+          },
+        ],
+      },
+    },
+  });
+
   const departmentsTable = useTable<FacultyDepartment>({
     columns: departmentColumns,
     refineCoreProps: {
       resource: `users/${userId}/departments`,
-      pagination: {
-        pageSize: 10,
-        mode: "server",
-      },
+      pagination: { pageSize: 10, mode: "server" },
     },
   });
 
@@ -180,10 +278,7 @@ const FacultyShow = () => {
     columns: subjectColumns,
     refineCoreProps: {
       resource: `users/${userId}/subjects`,
-      pagination: {
-        pageSize: 10,
-        mode: "server",
-      },
+      pagination: { pageSize: 10, mode: "server" },
     },
   });
 
@@ -211,7 +306,7 @@ const FacultyShow = () => {
           <CardTitle>Profile</CardTitle>
           <Badge variant="default">{user.role}</Badge>
         </CardHeader>
-        <CardContent className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
+        <CardContent className="flex flex-col gap-4 sm:flex-row sm:items-center sm: justify-between">
           <div className="flex items-center gap-4">
             <Avatar className="size-12">
               {user.image && <AvatarImage src={user.image} alt={user.name} />}
@@ -249,18 +344,25 @@ const FacultyShow = () => {
             <DataTable table={subjectsTable} paginationVariant="simple" />
           </CardContent>
         </Card>
+
+        {/* ✅ FIXED: Attendance card with proper table hook */}
+        <Card className="hover:shadow-md transition-shadow">
+          <CardHeader>
+            <CardTitle>Recent Attendance</CardTitle>
+          </CardHeader>
+          <CardContent className="space-y-4">
+            <p className="text-sm text-muted-foreground">
+              Recent attendance records for classes taught by {user.name}.
+            </p>
+            <DataTable
+              table={facultyAttendanceTable}
+              paginationVariant="simple"
+            />
+          </CardContent>
+        </Card>
       </div>
     </ShowView>
   );
-};
-
-const getInitials = (name = "") => {
-  const parts = name.trim().split(" ").filter(Boolean);
-  if (parts.length === 0) return "";
-  if (parts.length === 1) return parts[0][0]?.toUpperCase() ?? "";
-  return `${parts[0][0] ?? ""}${
-    parts[parts.length - 1][0] ?? ""
-  }`.toUpperCase();
 };
 
 export default FacultyShow;
