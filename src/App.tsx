@@ -43,6 +43,9 @@ import FacultyShow from "./pages/faculty/show";
 import EnrollmentsCreate from "./pages/enrollments/create";
 import EnrollmentsJoin from "./pages/enrollments/join";
 import EnrollmentConfirm from "./pages/enrollments/confirm";
+import AttendanceList from "./pages/attendance/list";
+import StudentAttendance from "./pages/attendance/student";
+import BulkAttendance from "./pages/attendance/bulk";
 import { InstallPWAButton } from "./components/refine-ui/buttons/InstallPWAButton";
 
 function App() {
@@ -124,6 +127,14 @@ function App() {
                     icon: <GraduationCap />,
                   },
                 },
+                {
+                  name: "attendance",
+                  list: "/attendance",
+                  meta: {
+                    label: "Attendance",
+                    icon: <ClipboardCheck />,
+                  },
+                },
               ]}
             >
               <Routes>
@@ -176,6 +187,12 @@ function App() {
                     <Route index element={<ClassesList />} />
                     <Route path="create" element={<ClassesCreate />} />
                     <Route path="show/:id" element={<ClassesShow />} />
+                  </Route>
+
+                  <Route path="attendance">
+                    <Route index element={<AttendanceList />} />
+                    <Route path="student" element={<StudentAttendance />} />
+                    <Route path="bulk" element={<BulkAttendance />} />
                   </Route>
                 </Route>
               </Routes>
