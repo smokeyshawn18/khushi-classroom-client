@@ -46,9 +46,10 @@ import EnrollmentConfirm from "./pages/enrollments/confirm";
 import AttendanceList from "./pages/attendance/list";
 import StudentAttendance from "./pages/attendance/student";
 import BulkAttendance from "./pages/attendance/bulk";
-import { InstallPWAButton } from "./components/refine-ui/buttons/InstallPWAButton";
+
 import { GlobalLoaderProvider } from "./context/global-loader-context";
 import { GlobalLoader } from "./components/global-loader";
+import { ForgotPassword } from "./pages/forgot-password";
 
 const APP_NAME = "Khushi Edu";
 const APP_TAGLINE = "Start your abroad career with Khushi.";
@@ -178,6 +179,10 @@ function App() {
                   >
                     <Route path="/login" element={<Login />} />
                     <Route path="/register" element={<Register />} />
+                    <Route
+                      path="/forgot-password"
+                      element={<ForgotPassword />}
+                    />
                   </Route>
 
                   <Route
