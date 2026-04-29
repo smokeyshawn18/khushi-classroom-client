@@ -47,8 +47,6 @@ import AttendanceList from "./pages/attendance/list";
 import StudentAttendance from "./pages/attendance/student";
 import BulkAttendance from "./pages/attendance/bulk";
 
-import { GlobalLoaderProvider } from "./context/global-loader-context";
-import { GlobalLoader } from "./components/global-loader";
 import { ForgotPassword } from "./pages/forgot-password";
 
 const APP_NAME = "Khushi Edu";
@@ -83,166 +81,161 @@ function App() {
   return (
     <BrowserRouter>
       <RefineKbarProvider>
-        <GlobalLoaderProvider>
-          <ThemeProvider>
-            <DevtoolsProvider>
-              <Refine
-                dataProvider={dataProvider}
-                authProvider={authProvider}
-                notificationProvider={useNotificationProvider()}
-                routerProvider={routerProvider}
-                options={{
-                  syncWithLocation: true,
-                  warnWhenUnsavedChanges: true,
-                  projectId: "kkWuv7-GgBIfw-P8CGy0",
-                  title: {
-                    text: "Khushi Edu",
-                    icon: (
-                      <img src={Logo} alt="Khushi Edu" style={{ height: 34 }} />
-                    ),
+        <ThemeProvider>
+          <DevtoolsProvider>
+            <Refine
+              dataProvider={dataProvider}
+              authProvider={authProvider}
+              notificationProvider={useNotificationProvider()}
+              routerProvider={routerProvider}
+              options={{
+                syncWithLocation: true,
+                warnWhenUnsavedChanges: true,
+                projectId: "kkWuv7-GgBIfw-P8CGy0",
+                title: {
+                  text: "Khushi Edu",
+                  icon: (
+                    <img src={Logo} alt="Khushi Edu" style={{ height: 34 }} />
+                  ),
+                },
+              }}
+              resources={[
+                {
+                  name: "dashboard",
+                  list: "/",
+                  meta: {
+                    label: "Home",
+                    icon: <Home />,
                   },
-                }}
-                resources={[
-                  {
-                    name: "dashboard",
-                    list: "/",
-                    meta: {
-                      label: "Home",
-                      icon: <Home />,
-                    },
+                },
+                {
+                  name: "subjects",
+                  list: "/subjects",
+                  create: "/subjects/create",
+                  show: "/subjects/show/:id",
+                  meta: {
+                    label: "Subjects",
+                    icon: <BookOpen />,
                   },
-                  {
-                    name: "subjects",
-                    list: "/subjects",
-                    create: "/subjects/create",
-                    show: "/subjects/show/:id",
-                    meta: {
-                      label: "Subjects",
-                      icon: <BookOpen />,
-                    },
+                },
+                {
+                  name: "departments",
+                  list: "/departments",
+                  show: "/departments/show/:id",
+                  create: "/departments/create",
+                  meta: {
+                    label: "Departments",
+                    icon: <Building2 />,
                   },
-                  {
-                    name: "departments",
-                    list: "/departments",
-                    show: "/departments/show/:id",
-                    create: "/departments/create",
-                    meta: {
-                      label: "Departments",
-                      icon: <Building2 />,
-                    },
+                },
+                {
+                  name: "users",
+                  list: "/faculty",
+                  show: "/faculty/show/:id",
+                  meta: {
+                    label: "Faculty",
+                    icon: <Users />,
                   },
-                  {
-                    name: "users",
-                    list: "/faculty",
-                    show: "/faculty/show/:id",
-                    meta: {
-                      label: "Faculty",
-                      icon: <Users />,
-                    },
+                },
+                {
+                  name: "enrollments",
+                  list: "/enrollments/create",
+                  create: "/enrollments/create",
+                  meta: {
+                    label: "Enrollments",
+                    icon: <ClipboardCheck />,
                   },
-                  {
-                    name: "enrollments",
-                    list: "/enrollments/create",
-                    create: "/enrollments/create",
-                    meta: {
-                      label: "Enrollments",
-                      icon: <ClipboardCheck />,
-                    },
+                },
+                {
+                  name: "classes",
+                  list: "/classes",
+                  create: "/classes/create",
+                  show: "/classes/show/:id",
+                  meta: {
+                    label: "Classes",
+                    icon: <GraduationCap />,
                   },
-                  {
-                    name: "classes",
-                    list: "/classes",
-                    create: "/classes/create",
-                    show: "/classes/show/:id",
-                    meta: {
-                      label: "Classes",
-                      icon: <GraduationCap />,
-                    },
+                },
+                {
+                  name: "attendance",
+                  list: "/attendance",
+                  meta: {
+                    label: "Attendance",
+                    icon: <ClipboardCheck />,
                   },
-                  {
-                    name: "attendance",
-                    list: "/attendance",
-                    meta: {
-                      label: "Attendance",
-                      icon: <ClipboardCheck />,
-                    },
-                  },
-                ]}
-              >
-                <Routes>
-                  <Route
-                    element={
-                      <Authenticated key="public-routes" fallback={<Outlet />}>
-                        <NavigateToResource fallbackTo="/" />
-                      </Authenticated>
-                    }
-                  >
-                    <Route path="/login" element={<Login />} />
-                    <Route path="/register" element={<Register />} />
-                    <Route
-                      path="/forgot-password"
-                      element={<ForgotPassword />}
-                    />
+                },
+              ]}
+            >
+              <Routes>
+                <Route
+                  element={
+                    <Authenticated key="public-routes" fallback={<Outlet />}>
+                      <NavigateToResource fallbackTo="/" />
+                    </Authenticated>
+                  }
+                >
+                  <Route path="/login" element={<Login />} />
+                  <Route path="/register" element={<Register />} />
+                  <Route path="/forgot-password" element={<ForgotPassword />} />
+                </Route>
+
+                <Route
+                  element={
+                    <Authenticated key="private-routes" fallback={<Login />}>
+                      <Layout>
+                        <Outlet />
+                      </Layout>
+                    </Authenticated>
+                  }
+                >
+                  <Route path="/" element={<Dashboard />} />
+
+                  <Route path="subjects">
+                    <Route index element={<SubjectsList />} />
+                    <Route path="create" element={<SubjectsCreate />} />
+                    <Route path="show/:id" element={<SubjectsShow />} />
                   </Route>
 
-                  <Route
-                    element={
-                      <Authenticated key="private-routes" fallback={<Login />}>
-                        <Layout>
-                          <Outlet />
-                        </Layout>
-                      </Authenticated>
-                    }
-                  >
-                    <Route path="/" element={<Dashboard />} />
-
-                    <Route path="subjects">
-                      <Route index element={<SubjectsList />} />
-                      <Route path="create" element={<SubjectsCreate />} />
-                      <Route path="show/:id" element={<SubjectsShow />} />
-                    </Route>
-
-                    <Route path="departments">
-                      <Route index element={<DepartmentsList />} />
-                      <Route path="create" element={<DepartmentsCreate />} />
-                      <Route path="show/:id" element={<DepartmentShow />} />
-                    </Route>
-
-                    <Route path="faculty">
-                      <Route index element={<FacultyList />} />
-                      <Route path="show/:id" element={<FacultyShow />} />
-                    </Route>
-
-                    <Route path="enrollments">
-                      <Route path="create" element={<EnrollmentsCreate />} />
-                      <Route path="join" element={<EnrollmentsJoin />} />
-                      <Route path="confirm" element={<EnrollmentConfirm />} />
-                    </Route>
-
-                    <Route path="classes">
-                      <Route index element={<ClassesList />} />
-                      <Route path="create" element={<ClassesCreate />} />
-                      <Route path="show/:id" element={<ClassesShow />} />
-                    </Route>
-
-                    <Route path="attendance">
-                      <Route index element={<AttendanceList />} />
-                      <Route path="student" element={<StudentAttendance />} />
-                      <Route path="bulk" element={<BulkAttendance />} />
-                    </Route>
+                  <Route path="departments">
+                    <Route index element={<DepartmentsList />} />
+                    <Route path="create" element={<DepartmentsCreate />} />
+                    <Route path="show/:id" element={<DepartmentShow />} />
                   </Route>
-                </Routes>
 
-                {/* <InstallPWAButton /> */}
-                <GlobalLoader />
-                <Toaster />
-                <RefineKbar />
-                <UnsavedChangesNotifier />
-                <DocumentTitleHandler handler={buildSeoDocumentTitle} />
-              </Refine>
-            </DevtoolsProvider>
-          </ThemeProvider>
-        </GlobalLoaderProvider>
+                  <Route path="faculty">
+                    <Route index element={<FacultyList />} />
+                    <Route path="show/:id" element={<FacultyShow />} />
+                  </Route>
+
+                  <Route path="enrollments">
+                    <Route path="create" element={<EnrollmentsCreate />} />
+                    <Route path="join" element={<EnrollmentsJoin />} />
+                    <Route path="confirm" element={<EnrollmentConfirm />} />
+                  </Route>
+
+                  <Route path="classes">
+                    <Route index element={<ClassesList />} />
+                    <Route path="create" element={<ClassesCreate />} />
+                    <Route path="show/:id" element={<ClassesShow />} />
+                  </Route>
+
+                  <Route path="attendance">
+                    <Route index element={<AttendanceList />} />
+                    <Route path="student" element={<StudentAttendance />} />
+                    <Route path="bulk" element={<BulkAttendance />} />
+                  </Route>
+                </Route>
+              </Routes>
+
+              {/* <InstallPWAButton /> */}
+
+              <Toaster />
+              <RefineKbar />
+              <UnsavedChangesNotifier />
+              <DocumentTitleHandler handler={buildSeoDocumentTitle} />
+            </Refine>
+          </DevtoolsProvider>
+        </ThemeProvider>
       </RefineKbarProvider>
     </BrowserRouter>
   );
