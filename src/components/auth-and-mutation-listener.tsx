@@ -1,6 +1,6 @@
 import { useEffect } from "react";
-import { useNotification, useUpdate, useCreate } from "@refinedev/core";
-import { useGlobalLoader } from "@/hooks/use-global-loader";
+import { useNotification } from "@refinedev/core";
+import { useGlobalLoader } from "@/context/global-loader-context";
 
 /**
  * Component to listen to global auth and mutation events
@@ -8,7 +8,7 @@ import { useGlobalLoader } from "@/hooks/use-global-loader";
  */
 export const AuthAndMutationListener = () => {
   const { setIsLoading } = useGlobalLoader();
-  const { push } = useNotification();
+  const { open } = useNotification();
 
   // Monitor create mutations
   useEffect(() => {
@@ -28,7 +28,7 @@ export const AuthAndMutationListener = () => {
     return () => {
       // Cleanup
     };
-  }, [setIsLoading, push]);
+  }, [setIsLoading, open]);
 
   return null;
 };
