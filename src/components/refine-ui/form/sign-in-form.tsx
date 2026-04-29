@@ -28,6 +28,7 @@ import {
   FormMessage,
 } from "@/components/ui/form";
 import { useLink, useLogin } from "@refinedev/core";
+import { useGlobalLoaderWithMutation } from "@/hooks/use-global-loader";
 
 const signInSchema = z.object({
   email: z.string().email("Invalid email address"),
@@ -41,6 +42,7 @@ export const SignInForm = () => {
   const Link = useLink();
 
   const { mutate: login, isPending: isLoggingIn } = useLogin();
+  useGlobalLoaderWithMutation(isLoggingIn, "Signing in...");
 
   const form = useForm<SignInFormValues>({
     resolver: zodResolver(signInSchema),

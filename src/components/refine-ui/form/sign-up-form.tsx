@@ -1,4 +1,5 @@
 import { useRegister, useLink } from "@refinedev/core";
+import { useGlobalLoaderWithMutation } from "@/hooks/use-global-loader";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import * as z from "zod";
@@ -53,6 +54,7 @@ type RegisterFormValues = z.infer<typeof registerSchema>;
 export const SignUpForm = () => {
   const Link = useLink();
   const { mutate: register, isPending: isRegistering } = useRegister();
+  useGlobalLoaderWithMutation(isRegistering, "Creating account...");
 
   const form = useForm<RegisterFormValues>({
     resolver: zodResolver(registerSchema),
