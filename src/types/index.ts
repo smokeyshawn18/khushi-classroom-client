@@ -122,3 +122,22 @@ export type SignUpPayload = {
   /** Required when role is "teacher" - secret key to authorize teacher sign-up */
   teacherSecretKey?: string;
 };
+
+export type FacultyDepartment = {
+  id: number;
+  name: string;
+  code?: string | null;
+  description?: string | null;
+};
+
+export type FacultySubject = {
+  id: number;
+  name: string;
+  code?: string | null;
+  description?: string | null;
+  department?: {
+    id: number;
+    name: string;
+    code?: string | null;
+  } | null;
+};

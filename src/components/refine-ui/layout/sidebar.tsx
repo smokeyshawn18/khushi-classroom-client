@@ -25,6 +25,7 @@ import {
   useLink,
   useMenu,
   useRefineOptions,
+  useGetIdentity,
   type TreeMenuItem,
 } from "@refinedev/core";
 import { ChevronRight, ListIcon } from "lucide-react";
@@ -33,6 +34,8 @@ import React from "react";
 export function Sidebar() {
   const { open } = useShadcnSidebar();
   const { menuItems, selectedKey } = useMenu();
+  const { data: currentUser } = useGetIdentity();
+  const viewerRole = (currentUser as any)?.role ?? "";
 
   return (
     <ShadcnSidebar collapsible="icon" className={cn("border-none")}>
@@ -55,13 +58,24 @@ export function Sidebar() {
           }
         )}
       >
-        {menuItems.map((item: TreeMenuItem) => (
-          <SidebarItem
-            key={item.key || item.name}
-            item={item}
-            selectedKey={selectedKey}
-          />
-        ))}
+        {menuItems
+          .filter((item: TreeMenuItem) => {
+            // hide Attendance menu for students only
+            if (
+              viewerRole === "student" &&
+              (item.name === "attendance" || item.key === "attendance")
+            ) {
+              return false;
+            }
+            return true;
+          })
+          .map((item: TreeMenuItem) => (
+            <SidebarItem
+              key={item.key || item.name}
+              item={item}
+              selectedKey={selectedKey}
+            />
+          ))}
       </ShadcnSidebarContent>
     </ShadcnSidebar>
   );

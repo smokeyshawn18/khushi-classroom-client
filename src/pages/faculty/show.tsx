@@ -13,26 +13,7 @@ import {
   ShowView,
   ShowViewHeader,
 } from "@/components/refine-ui/views/show-view";
-import type { User } from "@/types";
-
-type FacultyDepartment = {
-  id: number;
-  name: string;
-  code?: string | null;
-  description?: string | null;
-};
-
-type FacultySubject = {
-  id: number;
-  name: string;
-  code?: string | null;
-  description?: string | null;
-  department?: {
-    id: number;
-    name: string;
-    code?: string | null;
-  } | null;
-};
+import type { FacultyDepartment, FacultySubject, User } from "@/types";
 
 const FacultyShow = () => {
   const { id } = useParams();
@@ -190,6 +171,70 @@ const FacultyShow = () => {
     },
   });
 
+  const peopleColumns = useMemo<ColumnDef<User>[]>(
+    () => [
+      {
+        id: "name",
+        accessorKey: "name",
+        size: 220,
+        header: () => <p className="column-title">Name</p>,
+        cell: ({ row, getValue }) => {
+          const name = getValue<string>();
+          const image = row.original.image;
+          return (
+            <div className="flex items-center gap-3">
+              <Avatar>
+                {image && <AvatarImage src={image} alt={name} />}
+                <AvatarFallback>{getInitials(name)}</AvatarFallback>
+              </Avatar>
+              <span className="text-foreground">{name}</span>
+            </div>
+          );
+        },
+      },
+      {
+        id: "email",
+        accessorKey: "email",
+        size: 240,
+        header: () => <p className="column-title">Email</p>,
+        cell: ({ getValue }) => (
+          <span className="text-foreground">{getValue<string>()}</span>
+        ),
+      },
+      {
+        id: "role",
+        accessorKey: "role",
+        size: 120,
+        header: () => <p className="column-title">Role</p>,
+        cell: ({ getValue }) => <Badge>{getValue<string>()}</Badge>,
+      },
+      {
+        id: "details",
+        size: 140,
+        header: () => <p className="column-title">Details</p>,
+        cell: ({ row }) => (
+          <ShowButton
+            resource="users"
+            recordItemId={row.original.id}
+            variant="outline"
+            size="sm"
+          >
+            View
+          </ShowButton>
+        ),
+      },
+    ],
+    []
+  );
+
+  const studentsTable = useTable<User>({
+    columns: peopleColumns,
+    refineCoreProps: {
+      resource: `users/${userId}/students`,
+      pagination: { pageSize: 10, mode: "server" },
+    },
+  });
+
   if (query.isLoading || query.isError || !user) {
     return (
       <ShowView className="class-view">
@@ -229,6 +274,18 @@ const FacultyShow = () => {
       </Card>
 
       <div className="space-y-6">
+        <Card className="hover:shadow-md transition-shadow">
+          <CardHeader>
+            <CardTitle>Students</CardTitle>
+          </CardHeader>
+          <CardContent className="space-y-4">
+            <p className="text-sm text-muted-foreground">
+              Students associated with {user.name}
+            </p>
+            <DataTable table={studentsTable} paginationVariant="simple" />
+          </CardContent>
+        </Card>
+
         <Card className="hover:shadow-md transition-shadow">
           <CardHeader>
             <CardTitle>Departments</CardTitle>

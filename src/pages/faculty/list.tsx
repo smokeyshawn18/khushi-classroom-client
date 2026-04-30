@@ -1,10 +1,12 @@
 import { Search } from "lucide-react";
 import { useMemo, useState } from "react";
 import { ColumnDef } from "@tanstack/react-table";
+import { useGetIdentity } from "@refinedev/core";
 import { useTable } from "@refinedev/react-table";
 import { useSearchParams } from "react-router";
 
 import { Badge } from "@/components/ui/badge";
+import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { ListView } from "@/components/refine-ui/views/list-view";
@@ -18,6 +20,15 @@ const FacultyList = () => {
   const [searchQuery, setSearchQuery] = useState(
     searchParams.get("search") ?? ""
   );
+  const [selectedRole, setSelectedRole] = useState<"student" | "teacher">(
+    "student"
+  );
+  const { data: currentUser } = useGetIdentity<User>();
+  const viewerRoleRaw =
+    (currentUser as any)?.role ?? (currentUser as any)?.data?.role ?? "";
+  const viewerRole = String(viewerRoleRaw).toLowerCase();
+  const canToggleRole = viewerRole === "teacher" || viewerRole === "admin";
+  const roleFilter = canToggleRole ? selectedRole : "student";
 
   // ✅ ADDED: Search handler (3 lines)
   const handleSearchChange = (event: React.ChangeEvent<HTMLInputElement>) => {
@@ -99,8 +110,8 @@ const FacultyList = () => {
         permanent: [
           {
             field: "role",
-            operator: "in",
-            value: ["teacher", "student"],
+            operator: "eq",
+            value: roleFilter,
           },
           ...searchFilters,
         ],
@@ -122,9 +133,29 @@ const FacultyList = () => {
       <h1 className="page-title">Faculty</h1>
 
       <div className="intro-row">
-        <p>Browse and manage faculty members.</p>
+        <p>Browse and manage students and teachers.</p>
 
         <div className="actions-row">
+          {canToggleRole && (
+            <div className="flex items-center gap-2">
+              <Button
+                type="button"
+                variant={selectedRole === "student" ? "default" : "outline"}
+                size="sm"
+                onClick={() => setSelectedRole("student")}
+              >
+                Students
+              </Button>
+              <Button
+                type="button"
+                variant={selectedRole === "teacher" ? "default" : "outline"}
+                size="sm"
+                onClick={() => setSelectedRole("teacher")}
+              >
+                Teachers
+              </Button>
+            </div>
+          )}
           <div className="search-field">
             <Search className="search-icon" />
             <Input
