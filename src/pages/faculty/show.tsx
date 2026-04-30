@@ -25,16 +25,6 @@ const FacultyShow = () => {
 
   const user = query.data?.data;
 
-  // ✅ getInitials utility
-  const getInitials = (name = "") => {
-    const parts = name.trim().split(" ").filter(Boolean);
-    if (parts.length === 0) return "?";
-    if (parts.length === 1) return parts[0][0]?.toUpperCase() ?? "?";
-    return `${parts[0][0] ?? ""}${
-      parts[parts.length - 1][0] ?? ""
-    }`.toUpperCase();
-  };
-
   const departmentColumns = useMemo<ColumnDef<FacultyDepartment>[]>(
     () => [
       {
@@ -67,6 +57,7 @@ const FacultyShow = () => {
         header: () => <p className="column-title">Description</p>,
         cell: ({ getValue }) => {
           const description = getValue<string>();
+
           return description ? (
             <span className="truncate line-clamp-2">{description}</span>
           ) : (
@@ -80,12 +71,56 @@ const FacultyShow = () => {
         header: () => <p className="column-title">Details</p>,
         cell: ({ row }) => (
           <ShowButton
-            resource="student"
+            resource="departments"
             recordItemId={row.original.id}
             variant="outline"
             size="sm"
           >
-            View Attendance
+            View
+          </ShowButton>
+        ),
+      },
+    ],
+    []
+  );
+
+  const classesColumns = useMemo<ColumnDef<FacultySubject>[]>(
+    () => [
+      {
+        id: "id",
+        accessorKey: "id",
+        size: 120,
+        header: () => <p className="column-title ml-2">ID</p>,
+        cell: ({ getValue }) => {
+          const id = getValue<string>();
+          return id ? (
+            <Badge>{id}</Badge>
+          ) : (
+            <span className="text-muted-foreground ml-2">No ID</span>
+          );
+        },
+      },
+      {
+        id: "name",
+        accessorKey: "name",
+        size: 220,
+        header: () => <p className="column-title">Class</p>,
+        cell: ({ getValue }) => (
+          <span className="text-foreground">{getValue<string>()}</span>
+        ),
+      },
+      {
+        id: "details",
+        size: 140,
+        header: () => <p className="column-title">Details</p>,
+        cell: ({ row }) => (
+          <ShowButton
+            resource="classes"
+            recordItemId={row.original.id}
+            variant="outline"
+            size="sm"
+          >
+            View
           </ShowButton>
         ),
       },
@@ -159,7 +194,21 @@ const FacultyShow = () => {
     columns: departmentColumns,
     refineCoreProps: {
       resource: `users/${userId}/departments`,
-      pagination: { pageSize: 10, mode: "server" },
+      pagination: {
+        pageSize: 10,
+        mode: "server",
+      },
+    },
+  });
+
+  const classesTable = useTable({
+    columns: classesColumns,
+    refineCoreProps: {
+      resource: `users/${userId}/classes`,
+      pagination: {
+        pageSize: 10,
+        mode: "server",
+      },
     },
   });
 
@@ -167,71 +216,10 @@ const FacultyShow = () => {
     columns: subjectColumns,
     refineCoreProps: {
       resource: `users/${userId}/subjects`,
-      pagination: { pageSize: 10, mode: "server" },
-    },
-  });
-
-  const peopleColumns = useMemo<ColumnDef<User>[]>(
-    () => [
-      {
-        id: "name",
-        accessorKey: "name",
-        size: 220,
-        header: () => <p className="column-title">Name</p>,
-        cell: ({ row, getValue }) => {
-          const name = getValue<string>();
-          const image = row.original.image;
-          return (
-            <div className="flex items-center gap-3">
-              <Avatar>
-                {image && <AvatarImage src={image} alt={name} />}
-                <AvatarFallback>{getInitials(name)}</AvatarFallback>
-              </Avatar>
-              <span className="text-foreground">{name}</span>
-            </div>
-          );
-        },
+      pagination: {
+        pageSize: 10,
+        mode: "server",
       },
-      {
-        id: "email",
-        accessorKey: "email",
-        size: 240,
-        header: () => <p className="column-title">Email</p>,
-        cell: ({ getValue }) => (
-          <span className="text-foreground">{getValue<string>()}</span>
-        ),
-      },
-      {
-        id: "role",
-        accessorKey: "role",
-        size: 120,
-        header: () => <p className="column-title">Role</p>,
-        cell: ({ getValue }) => <Badge>{getValue<string>()}</Badge>,
-      },
-      {
-        id: "details",
-        size: 140,
-        header: () => <p className="column-title">Details</p>,
-        cell: ({ row }) => (
-          <ShowButton
-            resource="users"
-            recordItemId={row.original.id}
-            variant="outline"
-            size="sm"
-          >
-            View
-          </ShowButton>
-        ),
-      },
-    ],
-    []
-  );
-
-  const studentsTable = useTable<User>({
-    columns: peopleColumns,
-    refineCoreProps: {
-      resource: `users/${userId}/students`,
-      pagination: { pageSize: 10, mode: "server" },
     },
   });
 
@@ -259,7 +247,7 @@ const FacultyShow = () => {
           <CardTitle>Profile</CardTitle>
           <Badge variant="default">{user.role}</Badge>
         </CardHeader>
-        <CardContent className="flex flex-col gap-4 sm:flex-row sm:items-center sm: justify-between">
+        <CardContent className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
           <div className="flex items-center gap-4">
             <Avatar className="size-12">
               {user.image && <AvatarImage src={user.image} alt={user.name} />}
@@ -274,18 +262,6 @@ const FacultyShow = () => {
       </Card>
 
       <div className="space-y-6">
-        <Card className="hover:shadow-md transition-shadow">
-          <CardHeader>
-            <CardTitle>Students</CardTitle>
-          </CardHeader>
-          <CardContent className="space-y-4">
-            <p className="text-sm text-muted-foreground">
-              Students associated with {user.name}
-            </p>
-            <DataTable table={studentsTable} paginationVariant="simple" />
-          </CardContent>
-        </Card>
-
         <Card className="hover:shadow-md transition-shadow">
           <CardHeader>
             <CardTitle>Departments</CardTitle>
@@ -309,9 +285,29 @@ const FacultyShow = () => {
             <DataTable table={subjectsTable} paginationVariant="simple" />
           </CardContent>
         </Card>
+        <Card className="hover:shadow-md transition-shadow">
+          <CardHeader>
+            <CardTitle>Classes</CardTitle>
+          </CardHeader>
+          <CardContent className="space-y-4">
+            <p className="text-sm text-muted-foreground">
+              Classes associated with {user.name} in this term.
+            </p>
+            <DataTable table={classesTable} paginationVariant="simple" />
+          </CardContent>
+        </Card>
       </div>
     </ShowView>
   );
+};
+
+const getInitials = (name = "") => {
+  const parts = name.trim().split(" ").filter(Boolean);
+  if (parts.length === 0) return "";
+  if (parts.length === 1) return parts[0][0]?.toUpperCase() ?? "";
+  return `${parts[0][0] ?? ""}${
+    parts[parts.length - 1][0] ?? ""
+  }`.toUpperCase();
 };
 
 export default FacultyShow;

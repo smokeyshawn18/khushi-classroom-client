@@ -53,6 +53,13 @@ const options: CreateDataProviderOptions = {
           if (field === "date") params.date = value;
           if (field === "status") params.status = value;
         }
+        // allow filtering by teacher or student on endpoints that accept them
+        if (field === "teacher") {
+          params.teacher = value;
+        }
+        if (field === "student") {
+          params.student = value;
+        }
       });
 
       return params;
